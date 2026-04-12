@@ -1,0 +1,33 @@
+{
+  "recommended_budget_split": {
+    "content_agent": 0.22,
+    "ad_agent": 0.43,
+    "email_agent": 0.2,
+    "seo_agent": 0.15
+  },
+  "reasoning": [
+    "Paid ads are prioritized for immediate impressions and clicks.",
+    "Content and email support conversion and nurture depth.",
+    "SEO compounds over longer timeline horizons."
+  ],
+  "expected_kpis": {
+    "google_ads": {
+      "ctr": 0.028,
+      "impressions": 32000
+    },
+    "email": {
+      "open_rate": 0.37,
+      "ctr": 0.08
+    },
+    "seo": {
+      "impressions": 14000,
+      "ctr": 0.021
+    }
+  },
+  "timeline_recommendations": [
+    "Day 0-1: Launch paid + welcome email",
+    "Day 2-4: Publish SEO blog and test ad variants",
+    "Day 5-7: Shift budget to best-performing creatives"
+  ],
+  "roi": 0.35
+}
