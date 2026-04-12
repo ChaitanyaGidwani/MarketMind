@@ -6,7 +6,7 @@ from typing import Any
 
 import httpx
 
-BASE_URL = os.getenv("ORCHESTRATOR_DEMO_URL", "http://localhost:8001")
+BASE_URL = os.getenv("ORCHESTRATOR_BASE_URL", os.getenv("ORCHESTRATOR_DEMO_URL", "http://localhost:8001"))
 SERVICES = {
     "a2a_hub": "http://localhost:8000/health",
     "orchestrator": f"{BASE_URL}/health",
@@ -95,14 +95,14 @@ async def main() -> None:
     async with httpx.AsyncClient() as client:
         await check_health(client)
 
-        print("Step 2: Starting campaign with demo brief")
+        print("Step 2: Starting campaign with sample brief")
         start_response = await client.post(f"{BASE_URL}/campaign", json=CAMPAIGN_BRIEF, timeout=10)
         start_payload = start_response.json()
         campaign_id = start_payload.get("campaign_id")
 
         if not campaign_id:
             red_x(f"Campaign start failed: {start_payload}")
-            print("Demo complete. Open http://localhost:5173/results")
+            print("Run complete. Open http://localhost:5173/results")
             return
 
         green_check(f"campaign_id: {campaign_id}")
@@ -118,7 +118,7 @@ async def main() -> None:
         print_allocations(status_2, "Step 6: Second status snapshot")
 
         print_summary(status_2)
-        print("Demo complete. Open http://localhost:5173/results")
+        print("Run complete. Open http://localhost:5173/results")
 
 
 if __name__ == "__main__":

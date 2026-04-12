@@ -99,7 +99,7 @@ def _fallback_content_pack(goal: str, audience: str, company_name: str, product_
     return {
         "ad_variants": ad_variants,
         "blog_outline": {
-            "title": f"How {audience.title()} Can Launch {goal} In 7 Days",
+            "title": f"How {audience.title()} Can Launch {goal} Quickly and Predictably",
             "sections": [
                 {"heading": "Define Campaign Outcome", "key_points": ["North-star metric", "Offer", "Success threshold"]},
                 {"heading": "Craft the Message", "key_points": ["USP-first positioning", "Pain-point hooks", "Proof points"]},
@@ -111,7 +111,7 @@ def _fallback_content_pack(goal: str, audience: str, company_name: str, product_
         "social_posts": [
             {"channel": "twitter", "text": f"{brand} helps {audience} launch faster with a measurable campaign loop. #{goal.replace(' ', '')}"},
             {"channel": "twitter", "text": f"Most teams overcomplicate launch marketing. Focus on one audience, one offer, one KPI."},
-            {"channel": "linkedin", "text": f"We designed a practical 7-day launch framework for {audience}. It prioritizes velocity + ROI."},
+            {"channel": "linkedin", "text": f"We designed a practical launch framework for {audience}. It prioritizes velocity + ROI."},
             {"channel": "linkedin", "text": f"{brand} differentiates with {selling_point}. That single point should anchor every channel."},
             {"channel": "linkedin", "text": f"Want the exact checklist we use to ship launch campaigns? Start with goals, then map assets by channel."},
         ],

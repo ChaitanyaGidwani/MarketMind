@@ -35,7 +35,7 @@ SELF_URL = required_env("EMAIL_AGENT_URL")
 USE_MOCK = os.getenv("USE_MOCK", "false").lower() == "true"
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
 RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "onboarding@resend.dev")
-RESEND_TO_EMAIL = os.getenv("RESEND_TO_EMAIL", "demo@example.com")
+RESEND_TO_EMAIL = os.getenv("RESEND_TO_EMAIL", "marketing@yourcompany.com")
 SERVICE_VERSION = "1.0.0"
 
 
@@ -158,7 +158,7 @@ async def rpc(payload: dict[str, Any]) -> dict[str, Any]:
                 "day": 7,
                 "subject": f"Ready to launch your campaign?",
                 "preview_text": "Activate your plan and track ROI this week",
-                "html_body": "<h2>Launch Offer</h2><p>Your campaign kit is ready.</p><p><a href='https://example.com'>Launch now</a></p>",
+                "html_body": "<h2>Launch Offer</h2><p>Your campaign kit is ready.</p><p><a href='https://yourdomain.com/get-started'>Launch now</a></p>",
             },
         ]
         save_json_output(campaign_id, "emails.json", {"sequence": sequence})

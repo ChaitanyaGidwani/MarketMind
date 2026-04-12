@@ -1,6 +1,6 @@
 # MarketMind
 
-Multi-agent AI marketing platform built for a 7-day hackathon.
+Multi-agent AI marketing platform for orchestrated campaign planning and execution.
 
 ## Stack
 - Python 3.12 + FastAPI + Pydantic v2 + SQLAlchemy + httpx
@@ -42,5 +42,5 @@ Multi-agent AI marketing platform built for a 7-day hackathon.
 
 ## Notes
 - `USE_MOCK=true` bypasses external APIs with hardcoded responses.
-- No auth enabled (hackathon mode).
+- Authentication is currently disabled in local development mode.
 - Single active campaign at a time.

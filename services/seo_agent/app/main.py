@@ -149,7 +149,7 @@ async def rpc(payload: dict[str, Any]) -> dict[str, Any]:
                 "Link landing page to pricing and case studies",
                 "Link each blog post to primary product feature page",
                 "Use keyword-rich anchors for campaign templates",
-                "Add CTA links from educational content to demo booking",
+                "Add CTA links from educational content to consultation booking",
             ],
         }
         save_json_output(campaign_id, "seo_brief.json", seo_brief)

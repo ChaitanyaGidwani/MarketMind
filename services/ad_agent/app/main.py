@@ -129,7 +129,7 @@ async def rpc(payload: dict[str, Any]) -> dict[str, Any]:
                     f"Launch {goal}"[:30],
                     f"Built for {audience}"[:30],
                     f"Scale with {company_name}"[:30],
-                    f"ROI in 7 Days"[:30],
+                    f"Faster ROI, Clear Plan"[:30],
                 ],
                 "descriptions": [
                     f"{product_description} helps teams ship campaigns quickly and measure ROI."[:90],
