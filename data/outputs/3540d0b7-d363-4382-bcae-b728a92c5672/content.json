@@ -1,0 +1,86 @@
+{
+  "ad_variants": [
+    {
+      "headline": "MarketMind: Launch Smarter",
+      "body": "Built for SaaS startup founders aged 25-35, US market, AI multi-agent marketing platform helps teams move from idea to pipeline quickly.",
+      "cta": "Start Your Campaign"
+    },
+    {
+      "headline": "Stop Guessing, Start Scaling",
+      "body": "Use MarketMind to execute focused campaigns with clear ROI and Autonomous optimization across channels.",
+      "cta": "See It In Action"
+    },
+    {
+      "headline": "Marketing Built For Saas Startup Founders Aged 25-35, Us Market",
+      "body": "MarketMind delivers a professional go-to-market playbook tuned for conversion.",
+      "cta": "Get The Playbook"
+    }
+  ],
+  "blog_outline": {
+    "title": "How Saas Startup Founders Aged 25-35, Us Market Can Launch Launch a product campaign for our AI writing tool targeting startup founders Quickly and Predictably",
+    "sections": [
+      {
+        "heading": "Define Campaign Outcome",
+        "key_points": [
+          "North-star metric",
+          "Offer",
+          "Success threshold"
+        ]
+      },
+      {
+        "heading": "Craft the Message",
+        "key_points": [
+          "USP-first positioning",
+          "Pain-point hooks",
+          "Proof points"
+        ]
+      },
+      {
+        "heading": "Channel Plan",
+        "key_points": [
+          "Paid",
+          "Email",
+          "SEO"
+        ]
+      },
+      {
+        "heading": "Execution Timeline",
+        "key_points": [
+          "Day-by-day sprint",
+          "Dependencies",
+          "Owners"
+        ]
+      },
+      {
+        "heading": "Optimization Loop",
+        "key_points": [
+          "KPI review",
+          "Budget shifts",
+          "Iteration cadence"
+        ]
+      }
+    ]
+  },
+  "social_posts": [
+    {
+      "channel": "twitter",
+      "text": "MarketMind helps SaaS startup founders aged 25-35, US market launch faster with a measurable campaign loop. #LaunchaproductcampaignforourAIwritingtooltargetingstartupfounders"
+    },
+    {
+      "channel": "twitter",
+      "text": "Most teams overcomplicate launch marketing. Focus on one audience, one offer, one KPI."
+    },
+    {
+      "channel": "linkedin",
+      "text": "We designed a practical launch framework for SaaS startup founders aged 25-35, US market. It prioritizes velocity + ROI."
+    },
+    {
+      "channel": "linkedin",
+      "text": "MarketMind differentiates with Autonomous optimization across channels. That single point should anchor every channel."
+    },
+    {
+      "channel": "linkedin",
+      "text": "Want the exact checklist we use to ship launch campaigns? Start with goals, then map assets by channel."
+    }
+  ]
+}

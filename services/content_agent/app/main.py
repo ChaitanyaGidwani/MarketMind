@@ -39,6 +39,9 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 GROQ_MODEL = "llama-3.3-70b-versatile"
 SERVICE_VERSION = "1.0.0"
 
+if not USE_MOCK and not GROQ_API_KEY:
+    raise RuntimeError("GROQ_API_KEY is required when USE_MOCK=false")
+
 
 async def publish_event(campaign_id: str, event_type: str, payload: dict[str, Any]) -> None:
     req = {
@@ -127,7 +130,7 @@ async def generate_content_pack(
     tone_of_voice: str,
     retrieved_results: list[dict[str, Any]],
 ) -> dict[str, Any]:
-    if not GROQ_API_KEY:
+    if USE_MOCK:
         return _fallback_content_pack(goal, audience, company_name, product_description, usp, tone_of_voice)
 
     client = AsyncGroq(api_key=GROQ_API_KEY)

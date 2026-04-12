@@ -1,0 +1,22 @@
+{
+  "sequence": [
+    {
+      "day": 0,
+      "subject": "Welcome to Brewed Awakening",
+      "preview_text": "How Brewed Awakening is a specialty coffee shop in \nMumbai serving hand-crafted beverages made from \nsingle-origin beans sourced directly from Coorg \nand Chikmagalur farms. Our new winter seasonal \nmenu launches this week featuring 6 new drinks \nincluding hazelnut latte, spiced chai cold brew, \ndark chocolate mocha, and a signature Mumbai \ncutting chai fusion. All drinks are available \nfor dine-in, takeaway, and delivery via Zomato \nand Swiggy. helps Coffee lovers aged 20-35 in Mumbai,            working professionals, college students",
+      "html_body": "<h2>Welcome</h2><p>Thanks for checking out Brewed Awakening. We built this for Coffee lovers aged 20-35 in Mumbai,            working professionals, college students.</p><p>Brewed Awakening is a specialty coffee shop in \nMumbai serving hand-crafted beverages made from \nsingle-origin beans sourced directly from Coorg \nand Chikmagalur farms. Our new winter seasonal \nmenu launches this week featuring 6 new drinks \nincluding hazelnut latte, spiced chai cold brew, \ndark chocolate mocha, and a signature Mumbai \ncutting chai fusion. All drinks are available \nfor dine-in, takeaway, and delivery via Zomato \nand Swiggy.</p>"
+    },
+    {
+      "day": 3,
+      "subject": "How to get value from Brewed Awakening",
+      "preview_text": "A short playbook to move from setup to results",
+      "html_body": "<h2>Value Guide</h2><p>Start with one measurable goal: Increase foot traffic and online orders for \n      a specialty coffee shop launching a new \n      seasonal menu in Mumbai.</p><p>Our key differentiator is Only Mumbai coffee shop using directly sourced  Indian single-origin beans for specialty drinks  at cafe prices, not luxury prices. Real local  ingredients, real craft, no pretension..</p>"
+    },
+    {
+      "day": 7,
+      "subject": "Ready to launch your campaign?",
+      "preview_text": "Activate your plan and track ROI this week",
+      "html_body": "<h2>Launch Offer</h2><p>Your campaign kit is ready.</p><p><a href='https://yourdomain.com/get-started'>Launch now</a></p>"
+    }
+  ]
+}

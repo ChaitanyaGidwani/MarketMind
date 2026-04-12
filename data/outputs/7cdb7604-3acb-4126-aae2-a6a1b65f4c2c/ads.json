@@ -1,0 +1,46 @@
+{
+  "google_ads": {
+    "headlines": [
+      "MarketMind for Growth",
+      "Launch Launch a product campai",
+      "Built for startup founders",
+      "Scale with MarketMind",
+      "ROI in 7 Days"
+    ],
+    "descriptions": [
+      "AI-powered marketing campaign planner and execution workspace helps teams ship campaigns q",
+      "Designed for startup founders with clear reporting and optimization loops.",
+      "Switch to a faster workflow powered by Automates execution and optimization across channel",
+      "Set goals, launch assets, and optimize spend from one flow."
+    ]
+  },
+  "meta_ads": {
+    "primary_texts": [
+      "MarketMind helps startup founders launch faster with a complete campaign system.",
+      "Need better marketing outcomes? AI-powered marketing campaign planner and execution workspace",
+      "Turn strategy into pipeline with Automates execution and optimization across channels in one workflow."
+    ],
+    "headlines": [
+      "Launch With MarketMind",
+      "From Brief to ROI",
+      "Campaigns That Convert"
+    ],
+    "descriptions": [
+      "Create assets, launch channels, and monitor results in one place.",
+      "Optimize spend with performance feedback each round.",
+      "Built for lean teams that need speed and clarity."
+    ]
+  },
+  "audience_targeting": {
+    "core": "startup founders",
+    "geo": "US",
+    "age": "25-45",
+    "interests": [
+      "startup",
+      "saas",
+      "growth marketing",
+      "automation"
+    ]
+  },
+  "mock_mode": false
+}

@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import os
-import random
+import json
 import uuid
 from typing import Any
 
 import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from groq import AsyncGroq
 from pydantic import ValidationError
 
 from shared.schemas import HealthResponse, JsonRpcError, JsonRpcRequest, JsonRpcResponse
@@ -33,7 +34,95 @@ def required_env(name: str) -> str:
 A2A_HUB_URL = required_env("A2A_HUB_URL")
 SELF_URL = required_env("AD_AGENT_URL")
 USE_MOCK = os.getenv("USE_MOCK", "false").lower() == "true"
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 SERVICE_VERSION = "1.0.0"
+
+if not USE_MOCK and not GROQ_API_KEY:
+    raise RuntimeError("GROQ_API_KEY is required when USE_MOCK=false")
+
+
+def _fallback_ads(goal: str, audience: str, company_name: str, product_description: str, usp: str) -> dict[str, Any]:
+    return {
+        "google_ads": {
+            "headlines": [
+                f"{company_name} for Growth"[:30],
+                f"Launch {goal}"[:30],
+                f"Built for {audience}"[:30],
+                f"Scale with {company_name}"[:30],
+                "Faster ROI, Clear Plan"[:30],
+            ],
+            "descriptions": [
+                f"{product_description} helps teams ship campaigns quickly and measure ROI."[:90],
+                f"Designed for {audience} with clear reporting and optimization loops."[:90],
+                f"Switch to a faster workflow powered by {usp}."[:90],
+                "Set goals, launch assets, and optimize spend from one flow."[:90],
+            ],
+        },
+        "meta_ads": {
+            "primary_texts": [
+                f"{company_name} helps {audience} launch faster with a complete campaign system.",
+                f"Need better marketing outcomes? {product_description}",
+                f"Turn strategy into pipeline with {usp}.",
+            ],
+            "headlines": [
+                f"Launch With {company_name}",
+                "From Brief to ROI",
+                "Campaigns That Convert",
+            ],
+            "descriptions": [
+                "Create assets, launch channels, and monitor results in one place.",
+                "Optimize spend with performance feedback each round.",
+                "Built for lean teams that need speed and clarity.",
+            ],
+        },
+        "audience_targeting": {
+            "core": audience,
+            "geo": "US",
+            "age": "25-45",
+            "interests": ["startup", "saas", "growth marketing", "automation"],
+        },
+    }
+
+
+async def generate_ads(goal: str, audience: str, company_name: str, product_description: str, usp: str) -> dict[str, Any]:
+    if USE_MOCK:
+        return _fallback_ads(goal, audience, company_name, product_description, usp)
+
+    client = AsyncGroq(api_key=GROQ_API_KEY)
+    response = await client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a performance marketing specialist. Return valid JSON only with keys "
+                    "google_ads, meta_ads, audience_targeting."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    "Create campaign assets. "
+                    "google_ads must include headlines (5 max 30 chars each) and descriptions (4 max 90 chars each). "
+                    "meta_ads must include primary_texts (3), headlines (3), descriptions (3). "
+                    "audience_targeting must include core, geo, age, interests. "
+                    f"Goal: {goal}. Audience: {audience}. Company: {company_name}. "
+                    f"Product: {product_description}. USP: {usp}."
+                ),
+            },
+        ],
+        max_tokens=1200,
+    )
+    text = response.choices[0].message.content
+    try:
+        payload = json.loads(text or "{}")
+    except Exception as exc:
+        raise RuntimeError("Failed to parse Groq ad payload JSON") from exc
+
+    if not isinstance(payload, dict):
+        raise RuntimeError("Invalid Groq ad payload format")
+    return payload
 
 
 async def publish_event(campaign_id: str, event_type: str, payload: dict[str, Any]) -> None:
@@ -121,48 +210,7 @@ async def rpc(payload: dict[str, Any]) -> dict[str, Any]:
         budget_allocation = validated.budget_allocation
         await publish_event(campaign_id, "agent.progress", {"stage": "building Google/Meta sandbox ad sets"})
 
-        random.seed(f"{campaign_id}-ads")
-        result = {
-            "google_ads": {
-                "headlines": [
-                    f"{company_name} for Growth"[:30],
-                    f"Launch {goal}"[:30],
-                    f"Built for {audience}"[:30],
-                    f"Scale with {company_name}"[:30],
-                    f"Faster ROI, Clear Plan"[:30],
-                ],
-                "descriptions": [
-                    f"{product_description} helps teams ship campaigns quickly and measure ROI."[:90],
-                    f"Designed for {audience} with clear reporting and optimization loops."[:90],
-                    f"Switch to a faster workflow powered by {usp}."[:90],
-                    "Set goals, launch assets, and optimize spend from one flow."[:90],
-                ],
-            },
-            "meta_ads": {
-                "primary_texts": [
-                    f"{company_name} helps {audience} launch faster with a complete campaign system.",
-                    f"Need better marketing outcomes? {product_description}",
-                    f"Turn strategy into pipeline with {usp}.",
-                ],
-                "headlines": [
-                    f"Launch With {company_name}",
-                    "From Brief to ROI",
-                    "Campaigns That Convert",
-                ],
-                "descriptions": [
-                    "Create assets, launch channels, and monitor results in one place.",
-                    "Optimize spend with performance feedback each round.",
-                    "Built for lean teams that need speed and clarity.",
-                ],
-            },
-            "audience_targeting": {
-                "core": audience,
-                "geo": "US",
-                "age": "25-45",
-                "interests": ["startup", "saas", "growth marketing", "automation"],
-            },
-            "mock_mode": USE_MOCK,
-        }
+        result = await generate_ads(goal, audience, company_name, product_description, usp)
         save_json_output(campaign_id, "ads.json", result)
 
         spend = min(budget_allocation, budget_allocation * 0.85)

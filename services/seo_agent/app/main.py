@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import os
-import random
+import json
 import uuid
 from typing import Any
 
 import httpx
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from groq import AsyncGroq
 from pydantic import ValidationError
 
 from shared.schemas import HealthResponse, JsonRpcError, JsonRpcRequest, JsonRpcResponse
@@ -32,7 +33,78 @@ def required_env(name: str) -> str:
 
 A2A_HUB_URL = required_env("A2A_HUB_URL")
 SELF_URL = required_env("SEO_AGENT_URL")
+USE_MOCK = os.getenv("USE_MOCK", "false").lower() == "true"
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 SERVICE_VERSION = "1.0.0"
+
+if not USE_MOCK and not GROQ_API_KEY:
+    raise RuntimeError("GROQ_API_KEY is required when USE_MOCK=false")
+
+
+def _fallback_seo_brief(goal: str, audience: str, product_description: str, company_name: str) -> dict[str, Any]:
+    base_terms = [goal, audience, product_description, company_name, "growth", "marketing", "automation", "ROI", "campaign", "startup"]
+    keywords: list[dict[str, Any]] = []
+    for idx in range(20):
+        term = f"{base_terms[idx % len(base_terms)]} {['strategy', 'tool', 'platform', 'playbook', 'guide'][idx % 5]}".strip()
+        keywords.append({"keyword": term, "difficulty": float(30 + idx), "volume": int(500 + idx * 120)})
+
+    return {
+        "target_keywords": keywords,
+        "blog_titles": [
+            f"{goal}: The Complete Guide for {audience}",
+            f"How {company_name} Helps {audience} Grow Faster",
+            f"{product_description} Tactics That Improve ROI",
+            f"{audience.title()} Campaign Checklist for 2026",
+            f"From Strategy to Results: {goal}",
+        ],
+        "meta": {
+            "title": f"{company_name} | {goal}",
+            "description": f"Discover how {product_description} helps {audience} hit measurable growth goals.",
+        },
+        "internal_links": [
+            "Link landing page to pricing and case studies",
+            "Link each blog post to primary product feature page",
+            "Use keyword-rich anchors for campaign templates",
+            "Add CTA links from educational content to consultation booking",
+        ],
+    }
+
+
+async def generate_seo_brief(goal: str, audience: str, product_description: str, company_name: str) -> dict[str, Any]:
+    if USE_MOCK:
+        return _fallback_seo_brief(goal, audience, product_description, company_name)
+
+    client = AsyncGroq(api_key=GROQ_API_KEY)
+    response = await client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are an SEO strategist. Return JSON only with keys target_keywords, blog_titles, meta, internal_links."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    "Generate a production-ready SEO brief. target_keywords must have 20 items with keyword/difficulty/volume. "
+                    "blog_titles must have 5 titles. meta must include title and description. internal_links must include 4 actions. "
+                    f"Goal: {goal}. Audience: {audience}. Product: {product_description}. Company: {company_name}."
+                ),
+            },
+        ],
+        max_tokens=1500,
+    )
+    text = response.choices[0].message.content
+    try:
+        payload = json.loads(text or "{}")
+    except Exception as exc:
+        raise RuntimeError("Failed to parse Groq SEO payload JSON") from exc
+
+    if not isinstance(payload, dict):
+        raise RuntimeError("Invalid Groq SEO payload format")
+    return payload
 
 
 async def publish_event(campaign_id: str, event_type: str, payload: dict[str, Any]) -> None:
@@ -119,39 +191,7 @@ async def rpc(payload: dict[str, Any]) -> dict[str, Any]:
         budget_allocation = validated.budget_allocation
 
         await publish_event(campaign_id, "agent.progress", {"stage": "keyword clustering"})
-        random.seed(f"{campaign_id}-seo")
-        base_terms = [goal, audience, product_description, company_name, "growth", "marketing", "automation", "ROI", "campaign", "startup"]
-        keywords = []
-        for idx in range(20):
-            term = f"{base_terms[idx % len(base_terms)]} {['strategy','tool','platform','playbook','guide'][idx % 5]}".strip()
-            keywords.append(
-                {
-                    "keyword": term,
-                    "difficulty": round(20 + random.random() * 70, 1),
-                    "volume": int(300 + random.random() * 5000),
-                }
-            )
-
-        seo_brief = {
-            "target_keywords": keywords,
-            "blog_titles": [
-                f"{goal}: The Complete Guide for {audience}",
-                f"How {company_name} Helps {audience} Grow Faster",
-                f"{product_description} Tactics That Improve ROI",
-                f"{audience.title()} Campaign Checklist for 2026",
-                f"From Strategy to Results: {goal}",
-            ],
-            "meta": {
-                "title": f"{company_name} | {goal}",
-                "description": f"Discover how {product_description} helps {audience} hit measurable growth goals.",
-            },
-            "internal_links": [
-                "Link landing page to pricing and case studies",
-                "Link each blog post to primary product feature page",
-                "Use keyword-rich anchors for campaign templates",
-                "Add CTA links from educational content to consultation booking",
-            ],
-        }
+        seo_brief = await generate_seo_brief(goal, audience, product_description, company_name)
         save_json_output(campaign_id, "seo_brief.json", seo_brief)
 
         spend = min(12.0, budget_allocation * 0.15)

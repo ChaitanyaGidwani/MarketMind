@@ -34,9 +34,12 @@ A2A_HUB_URL = required_env("A2A_HUB_URL")
 SELF_URL = required_env("EMAIL_AGENT_URL")
 USE_MOCK = os.getenv("USE_MOCK", "false").lower() == "true"
 RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
-RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "onboarding@resend.dev")
+RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "chaitanya13197@gmail.com")
 RESEND_TO_EMAIL = os.getenv("RESEND_TO_EMAIL", "marketing@yourcompany.com")
 SERVICE_VERSION = "1.0.0"
+
+if not USE_MOCK and not RESEND_API_KEY:
+    raise RuntimeError("RESEND_API_KEY is required when USE_MOCK=false")
 
 
 async def publish_event(campaign_id: str, event_type: str, payload: dict[str, Any]) -> None:
@@ -75,7 +78,7 @@ async def register_card() -> None:
 
 
 async def send_resend_email(subject: str, body: str) -> dict[str, Any]:
-    if not RESEND_API_KEY:
+    if USE_MOCK:
         return {"mocked": True, "id": "resend-mock-001"}
 
     payload = {
