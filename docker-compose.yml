@@ -1,0 +1,109 @@
+services:
+  a2a_hub:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: uvicorn services.a2a_hub.app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+
+  orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: uvicorn services.orchestrator.app.main:app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+    depends_on:
+      - a2a_hub
+
+  content_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: uvicorn services.content_agent.app.main:app --host 0.0.0.0 --port 8002
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+    depends_on:
+      - a2a_hub
+
+  ad_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: uvicorn services.ad_agent.app.main:app --host 0.0.0.0 --port 8003
+    ports:
+      - "8003:8003"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+    depends_on:
+      - a2a_hub
+
+  email_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: uvicorn services.email_agent.app.main:app --host 0.0.0.0 --port 8004
+    ports:
+      - "8004:8004"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+    depends_on:
+      - a2a_hub
+
+  seo_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: uvicorn services.seo_agent.app.main:app --host 0.0.0.0 --port 8005
+    ports:
+      - "8005:8005"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+    depends_on:
+      - a2a_hub
+
+  analytics_agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    command: uvicorn services.analytics_agent.app.main:app --host 0.0.0.0 --port 8006
+    ports:
+      - "8006:8006"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+    depends_on:
+      - a2a_hub
+
+  frontend:
+    image: node:20-alpine
+    working_dir: /app/frontend
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5173"
+    ports:
+      - "5173:5173"
+    env_file:
+      - .env
+    volumes:
+      - ./:/app
+    depends_on:
+      - a2a_hub

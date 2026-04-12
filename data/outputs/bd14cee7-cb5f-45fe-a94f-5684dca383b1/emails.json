@@ -1,0 +1,22 @@
+{
+  "sequence": [
+    {
+      "day": 0,
+      "subject": "Welcome to MarketMind",
+      "preview_text": "How AI-powered marketing campaign planner and execution workspace helps startup founders",
+      "html_body": "<h2>Welcome</h2><p>Thanks for checking out MarketMind. We built this for startup founders.</p><p>AI-powered marketing campaign planner and execution workspace</p>"
+    },
+    {
+      "day": 3,
+      "subject": "How to get value from MarketMind",
+      "preview_text": "A short playbook to move from setup to results",
+      "html_body": "<h2>Value Guide</h2><p>Start with one measurable goal: Launch a product campaign for startup founders.</p><p>Our key differentiator is Automates execution and optimization across channels in one workflow.</p>"
+    },
+    {
+      "day": 7,
+      "subject": "Ready to launch your campaign?",
+      "preview_text": "Activate your plan and track ROI this week",
+      "html_body": "<h2>Launch Offer</h2><p>Your campaign kit is ready.</p><p><a href='https://example.com'>Launch now</a></p>"
+    }
+  ]
+}
