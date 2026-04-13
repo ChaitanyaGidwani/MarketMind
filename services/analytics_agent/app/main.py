@@ -52,8 +52,13 @@ async def publish_event(campaign_id: str, event_type: str, payload: dict[str, An
             }
         },
     }
-    async with httpx.AsyncClient(timeout=10) as client:
-        await client.post(f"{A2A_HUB_URL}/rpc", json=req)
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.post(f"{A2A_HUB_URL}/rpc", json=req)
+            response.raise_for_status()
+    except Exception as e:
+        import sys
+        print(f"[analytics_agent] Warning: Failed to publish event: {type(e).__name__}: {str(e)}", file=sys.stderr)
 
 
 @app.on_event("startup")

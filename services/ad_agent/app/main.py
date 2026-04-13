@@ -89,39 +89,41 @@ async def generate_ads(goal: str, audience: str, company_name: str, product_desc
     if USE_MOCK:
         return _fallback_ads(goal, audience, company_name, product_description, usp)
 
-    client = AsyncGroq(api_key=GROQ_API_KEY)
-    response = await client.chat.completions.create(
-        model=GROQ_MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are a performance marketing specialist. Return valid JSON only with keys "
-                    "google_ads, meta_ads, audience_targeting."
-                ),
-            },
-            {
-                "role": "user",
-                "content": (
-                    "Create campaign assets. "
-                    "google_ads must include headlines (5 max 30 chars each) and descriptions (4 max 90 chars each). "
-                    "meta_ads must include primary_texts (3), headlines (3), descriptions (3). "
-                    "audience_targeting must include core, geo, age, interests. "
-                    f"Goal: {goal}. Audience: {audience}. Company: {company_name}. "
-                    f"Product: {product_description}. USP: {usp}."
-                ),
-            },
-        ],
-        max_tokens=1200,
-    )
-    text = response.choices[0].message.content
     try:
+        client = AsyncGroq(api_key=GROQ_API_KEY)
+        response = await client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a performance marketing specialist. Return valid JSON only with keys "
+                        "google_ads, meta_ads, audience_targeting."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        "Create campaign assets. "
+                        "google_ads must include headlines (5 max 30 chars each) and descriptions (4 max 90 chars each). "
+                        "meta_ads must include primary_texts (3), headlines (3), descriptions (3). "
+                        "audience_targeting must include core, geo, age, interests. "
+                        f"Goal: {goal}. Audience: {audience}. Company: {company_name}. "
+                        f"Product: {product_description}. USP: {usp}."
+                    ),
+                },
+            ],
+            max_tokens=1200,
+        )
+        text = response.choices[0].message.content
         payload = json.loads(text or "{}")
-    except Exception as exc:
-        raise RuntimeError("Failed to parse Groq ad payload JSON") from exc
+    except Exception as e:
+        import sys
+        print(f"[ad_agent] Error generating ads: {type(e).__name__}: {str(e)}", file=sys.stderr)
+        return _fallback_ads(goal, audience, company_name, product_description, usp)
 
     if not isinstance(payload, dict):
-        raise RuntimeError("Invalid Groq ad payload format")
+        return _fallback_ads(goal, audience, company_name, product_description, usp)
     return payload
 
 
@@ -139,8 +141,13 @@ async def publish_event(campaign_id: str, event_type: str, payload: dict[str, An
             }
         },
     }
-    async with httpx.AsyncClient(timeout=10) as client:
-        await client.post(f"{A2A_HUB_URL}/rpc", json=req)
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.post(f"{A2A_HUB_URL}/rpc", json=req)
+            response.raise_for_status()
+    except Exception as e:
+        import sys
+        print(f"[ad_agent] Warning: Failed to publish event: {type(e).__name__}: {str(e)}", file=sys.stderr)
 
 
 @app.on_event("startup")

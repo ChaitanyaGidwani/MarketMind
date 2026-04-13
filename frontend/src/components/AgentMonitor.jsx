@@ -43,7 +43,10 @@ function AgentMonitor({ events, status }) {
               </div>
               <span className="text-[13px] text-text-secondary">{formatAge(evt.timestamp)}</span>
             </div>
-            <p className="mt-2 text-[20px] text-text-primary">{evt.payload?.stage || evt.payload?.message || evt.payload?.type || evt.event_type}</p>
+            <p className="mt-2 text-[20px] text-text-primary">{evt.payload?.stage || evt.payload?.message || evt.payload?.type || evt.payload?.error || evt.payload?.reason || evt.event_type}</p>
+            {evt.event_type === 'agent.failed' && (evt.payload?.error || evt.payload?.reason) ? (
+              <p className="mt-1 text-sm text-red-300">{evt.payload.error || evt.payload.reason}</p>
+            ) : null}
             <p className="mt-1 text-sm text-text-secondary">View payload ›</p>
           </div>
         ))}

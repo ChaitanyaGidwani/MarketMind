@@ -107,7 +107,8 @@ export default function useCampaignSession() {
       next[agent] = {
         ...current,
         status: nextStatus,
-        task: payload.stage || payload.message || payload.type || current.task,
+        task: payload.stage || payload.message || payload.type || payload.error || payload.reason || current.task,
+        error: payload.error || payload.reason || current.error,
       }
       return next
     })
@@ -212,6 +213,20 @@ export default function useCampaignSession() {
               ...next[agent],
               budget: Number(amount || 0),
               status: normalized === 'running' ? 'running' : next[agent].status,
+            }
+          }
+          return next
+        })
+      }
+
+      if (data?.agent_states && typeof data.agent_states === 'object') {
+        setAgentStates((prev) => {
+          const next = { ...prev }
+          for (const [agent, state] of Object.entries(data.agent_states)) {
+            if (!next[agent]) continue
+            next[agent] = {
+              ...next[agent],
+              ...state,
             }
           }
           return next

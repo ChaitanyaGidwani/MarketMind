@@ -75,35 +75,37 @@ async def generate_seo_brief(goal: str, audience: str, product_description: str,
     if USE_MOCK:
         return _fallback_seo_brief(goal, audience, product_description, company_name)
 
-    client = AsyncGroq(api_key=GROQ_API_KEY)
-    response = await client.chat.completions.create(
-        model=GROQ_MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are an SEO strategist. Return JSON only with keys target_keywords, blog_titles, meta, internal_links."
-                ),
-            },
-            {
-                "role": "user",
-                "content": (
-                    "Generate a production-ready SEO brief. target_keywords must have 20 items with keyword/difficulty/volume. "
-                    "blog_titles must have 5 titles. meta must include title and description. internal_links must include 4 actions. "
-                    f"Goal: {goal}. Audience: {audience}. Product: {product_description}. Company: {company_name}."
-                ),
-            },
-        ],
-        max_tokens=1500,
-    )
-    text = response.choices[0].message.content
     try:
+        client = AsyncGroq(api_key=GROQ_API_KEY)
+        response = await client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an SEO strategist. Return JSON only with keys target_keywords, blog_titles, meta, internal_links."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": (
+                        "Generate a production-ready SEO brief. target_keywords must have 20 items with keyword/difficulty/volume. "
+                        "blog_titles must have 5 titles. meta must include title and description. internal_links must include 4 actions. "
+                        f"Goal: {goal}. Audience: {audience}. Product: {product_description}. Company: {company_name}."
+                    ),
+                },
+            ],
+            max_tokens=1500,
+        )
+        text = response.choices[0].message.content
         payload = json.loads(text or "{}")
-    except Exception as exc:
-        raise RuntimeError("Failed to parse Groq SEO payload JSON") from exc
+    except Exception as e:
+        import sys
+        print(f"[seo_agent] Error generating SEO brief: {type(e).__name__}: {str(e)}", file=sys.stderr)
+        return _fallback_seo_brief(goal, audience, product_description, company_name)
 
     if not isinstance(payload, dict):
-        raise RuntimeError("Invalid Groq SEO payload format")
+        return _fallback_seo_brief(goal, audience, product_description, company_name)
     return payload
 
 
@@ -121,8 +123,13 @@ async def publish_event(campaign_id: str, event_type: str, payload: dict[str, An
             }
         },
     }
-    async with httpx.AsyncClient(timeout=10) as client:
-        await client.post(f"{A2A_HUB_URL}/rpc", json=req)
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.post(f"{A2A_HUB_URL}/rpc", json=req)
+            response.raise_for_status()
+    except Exception as e:
+        import sys
+        print(f"[seo_agent] Warning: Failed to publish event: {type(e).__name__}: {str(e)}", file=sys.stderr)
 
 
 @app.on_event("startup")

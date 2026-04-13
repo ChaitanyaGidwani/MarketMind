@@ -77,9 +77,41 @@ campaign_lock = asyncio.Lock()
 active_campaign_id: str | None = None
 allocation_history_by_campaign: dict[str, list[dict[str, Any]]] = {}
 latest_allocations_by_campaign: dict[str, dict[str, float]] = {}
+agent_states_by_campaign: dict[str, dict[str, dict[str, Any]]] = {}
+
+
+def initialize_agent_states() -> dict[str, dict[str, Any]]:
+    return {
+        name: {"name": name.replace("_", " ").title(), "status": "idle", "task": "Waiting for run", "error": "", "budget": 0.0}
+        for name in AGENTS.keys()
+    }
+
+
+def record_agent_state(campaign_id: str, event_type: str, agent: str | None, payload: dict[str, Any]) -> None:
+    if not agent or agent not in AGENTS:
+        return
+
+    campaign_states = agent_states_by_campaign.setdefault(campaign_id, initialize_agent_states())
+    current = campaign_states.get(agent, {"name": agent.replace("_", " ").title(), "status": "idle", "task": "Waiting for run", "error": "", "budget": 0.0})
+
+    status = current.get("status", "idle")
+    if event_type in {"agent.started", "agent.progress"}:
+        status = "running"
+    elif event_type == "agent.completed":
+        status = "completed"
+    elif event_type == "agent.failed":
+        status = "failed"
+
+    campaign_states[agent] = {
+        **current,
+        "status": status,
+        "task": payload.get("stage") or payload.get("message") or payload.get("type") or current.get("task", "Waiting for run"),
+        "error": payload.get("error") or payload.get("reason") or current.get("error", ""),
+    }
 
 
 async def send_event(campaign_id: str, event_type: str, payload: dict[str, Any], agent: str | None = None) -> None:
+    record_agent_state(campaign_id, event_type, agent, payload)
     req = {
         "jsonrpc": "2.0",
         "id": str(uuid.uuid4()),
@@ -300,6 +332,7 @@ def build_status_result(campaign: Campaign) -> dict[str, Any]:
         "round": campaign.round,
         "current_allocations": current_allocations,
         "allocation_history": allocation_history,
+        "agent_states": agent_states_by_campaign.get(campaign.id, initialize_agent_states()),
     }
 
 
@@ -345,6 +378,7 @@ async def start_campaign_from_params(params: dict[str, Any]) -> tuple[bool, dict
             db.add(campaign)
             await db.commit()
             active_campaign_id = campaign_id
+            agent_states_by_campaign[campaign_id] = initialize_agent_states()
 
     asyncio.create_task(execute_campaign(campaign_id, brief))
     return True, {"campaign_id": campaign_id, "status": "running"}
@@ -422,6 +456,38 @@ async def campaign_outputs(campaign_id: str) -> dict[str, Any]:
         if filename.endswith(".json"):
             payload[filename] = read_json_output(campaign_id, filename)
     return payload
+
+
+def _read_named_output(campaign_id: str, filename: str, key: str) -> dict[str, Any]:
+    data = read_json_output(campaign_id, filename)
+    if data is None:
+        return {"error": {"code": 404, "message": f"{filename} not found"}}
+    return {"campaign_id": campaign_id, key: data}
+
+
+@app.get("/outputs/{campaign_id}/content.json")
+async def campaign_content_output(campaign_id: str) -> dict[str, Any]:
+    return _read_named_output(campaign_id, "content.json", "content")
+
+
+@app.get("/outputs/{campaign_id}/emails.json")
+async def campaign_emails_output(campaign_id: str) -> dict[str, Any]:
+    return _read_named_output(campaign_id, "emails.json", "emails")
+
+
+@app.get("/outputs/{campaign_id}/seo_brief.json")
+async def campaign_seo_output(campaign_id: str) -> dict[str, Any]:
+    return _read_named_output(campaign_id, "seo_brief.json", "seo_brief")
+
+
+@app.get("/outputs/{campaign_id}/ads.json")
+async def campaign_ads_output(campaign_id: str) -> dict[str, Any]:
+    return _read_named_output(campaign_id, "ads.json", "ads")
+
+
+@app.get("/outputs/{campaign_id}/strategy.json")
+async def campaign_strategy_output(campaign_id: str) -> dict[str, Any]:
+    return _read_named_output(campaign_id, "strategy.json", "strategy")
 
 
 @app.get("/outputs/{campaign_id}/download")

@@ -1,0 +1,45 @@
+{
+  "google_ads": {
+    "headlines": [
+      "Brewed Awakening for Growth",
+      "Launch Launch a seasonal menu ",
+      "Built for Coffee lovers aged 2",
+      "Scale with Brewed Awakening",
+      "Faster ROI, Clear Plan"
+    ],
+    "descriptions": [
+      "Brewed Awakening is a specialty coffee shop in \nMumbai serving hand-crafted beverages made",
+      "Designed for Coffee lovers aged 20-35 in Mumbai, working  professionals in BKC and Lower P",
+      "Switch to a faster workflow powered by Only Mumbai coffee shop using directly sourced  Ind",
+      "Set goals, launch assets, and optimize spend from one flow."
+    ]
+  },
+  "meta_ads": {
+    "primary_texts": [
+      "Brewed Awakening helps Coffee lovers aged 20-35 in Mumbai, working  professionals in BKC and Lower Parel, college  students near campuses, people who treat coffee  as a daily ritual not just a caffeine fix launch faster with a complete campaign system.",
+      "Need better marketing outcomes? Brewed Awakening is a specialty coffee shop in \nMumbai serving hand-crafted beverages made from \nsingle-origin beans sourced directly from Coorg \nand Chikmagalur farms. Our new winter seasonal \nmenu launches this week featuring 6 new drinks \nincluding hazelnut latte, spiced chai cold brew, \ndark chocolate mocha, and a signature Mumbai \ncutting chai fusion. All drinks are available \nfor dine-in, takeaway, and delivery via Zomato \nand Swiggy.",
+      "Turn strategy into pipeline with Only Mumbai coffee shop using directly sourced  Indian single-origin beans for specialty drinks  at cafe prices, not luxury prices. Real local  ingredients, real craft, no pretension.."
+    ],
+    "headlines": [
+      "Launch With Brewed Awakening",
+      "From Brief to ROI",
+      "Campaigns That Convert"
+    ],
+    "descriptions": [
+      "Create assets, launch channels, and monitor results in one place.",
+      "Optimize spend with performance feedback each round.",
+      "Built for lean teams that need speed and clarity."
+    ]
+  },
+  "audience_targeting": {
+    "core": "Coffee lovers aged 20-35 in Mumbai, working  professionals in BKC and Lower Parel, college  students near campuses, people who treat coffee  as a daily ritual not just a caffeine fix",
+    "geo": "US",
+    "age": "25-45",
+    "interests": [
+      "startup",
+      "saas",
+      "growth marketing",
+      "automation"
+    ]
+  }
+}

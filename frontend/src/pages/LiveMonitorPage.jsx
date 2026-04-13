@@ -19,7 +19,9 @@ function LiveMonitorPage({ session }) {
         <h1 className="text-[38px] font-semibold leading-tight text-text-primary">Live Monitor</h1>
         <div className="mt-2 flex items-center gap-6 text-[16px] text-text-secondary">
           <span>Campaign ID: {campaignId || '—'}</span>
-          <span className="text-success">● Running</span>
+          <span className={status === 'failed' ? 'text-red-400' : status === 'completed' ? 'text-success' : 'text-amber-400'}>
+            ● {status === 'failed' ? 'Failed' : status === 'completed' ? 'Completed' : 'Running'}
+          </span>
           <span>Round {Math.min(round, 3)} of 3</span>
           <span>Budget ${totalBudget}</span>
         </div>
@@ -48,8 +50,12 @@ function LiveMonitorPage({ session }) {
                     {agent.status}
                   </span>
                 </div>
-                <p className="mt-1 flex items-center gap-2 text-[15px] text-text-secondary"><StatusDot status={agent.status} /> {agent.status === 'running' ? 'Active' : 'Idle'}</p>
+                <p className="mt-1 flex items-center gap-2 text-[15px] text-text-secondary">
+                  <StatusDot status={agent.status} />{' '}
+                  {agent.status === 'running' ? 'Active' : agent.status === 'failed' ? 'Failed' : 'Idle'}
+                </p>
                 <p className="mt-2 text-[16px] text-text-secondary">Task: {agent.task}</p>
+                {agent.status === 'failed' && agent.error ? <p className="mt-2 text-[14px] text-red-300">Error: {agent.error}</p> : null}
                 <p className="mt-2 text-[16px] text-text-secondary">Budget: ${amount.toFixed(2)}</p>
                 <div className="mt-2 h-1.5 rounded-full bg-canvas">
                   <div className="h-1.5 rounded-full bg-accent" style={{ width: `${width}%` }} />

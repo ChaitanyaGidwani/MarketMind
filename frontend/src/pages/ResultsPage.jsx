@@ -11,7 +11,7 @@ function HeroCard({ title, value, sub }) {
 }
 
 function ResultsPage({ session }) {
-  const { outputs, campaignId, currentAllocations, fields } = session
+  const { campaignId, currentAllocations, fields } = session
   const budgetUsed = Object.values(currentAllocations).reduce((sum, value) => sum + Number(value || 0), 0)
   const totalBudget = Number(fields.budget || 0)
 
@@ -32,7 +32,7 @@ function ResultsPage({ session }) {
         <HeroCard title="Tokens Saved" value="64%" />
       </section>
 
-      <OutputPreviews outputs={outputs} campaignId={campaignId} />
+      <OutputPreviews campaignId={campaignId} companyName={fields.companyName} />
     </div>
   )
 }

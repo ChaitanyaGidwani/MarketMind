@@ -44,3 +44,4 @@ Multi-agent AI marketing platform for orchestrated campaign planning and executi
 - `USE_MOCK=true` bypasses external APIs with hardcoded responses.
 - Authentication is currently disabled in local development mode.
 - Single active campaign at a time.
+

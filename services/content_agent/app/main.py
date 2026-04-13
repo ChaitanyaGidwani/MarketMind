@@ -57,8 +57,13 @@ async def publish_event(campaign_id: str, event_type: str, payload: dict[str, An
             }
         },
     }
-    async with httpx.AsyncClient(timeout=10) as client:
-        await client.post(f"{A2A_HUB_URL}/rpc", json=req)
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.post(f"{A2A_HUB_URL}/rpc", json=req)
+            response.raise_for_status()
+    except Exception as e:
+        import sys
+        print(f"[content_agent] Warning: Failed to publish event: {type(e).__name__}: {str(e)}", file=sys.stderr)
 
 
 @app.on_event("startup")
@@ -133,33 +138,35 @@ async def generate_content_pack(
     if USE_MOCK:
         return _fallback_content_pack(goal, audience, company_name, product_description, usp, tone_of_voice)
 
-    client = AsyncGroq(api_key=GROQ_API_KEY)
-    system_prompt = (
-        "Here are the top performing past campaigns for similar goals: "
-        f"{json.dumps(retrieved_results, ensure_ascii=False, default=str)}. Use these as reference."
-    )
-    response = await client.chat.completions.create(
-        model=GROQ_MODEL,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {
-                "role": "user",
-                "content": (
-                    "Create JSON only with keys ad_variants, blog_outline, social_posts. "
-                    "ad_variants must include 3 objects with headline/body/cta. "
-                    "blog_outline must include title and exactly 5 sections with heading and key_points list. "
-                    "social_posts must include exactly 5 posts for twitter/linkedin. "
-                    f"Goal: {goal}. Audience: {audience}. Company: {company_name}. "
-                    f"Product: {product_description}. USP: {usp}. Tone: {tone_of_voice}."
-                ),
-            },
-        ],
-        max_tokens=1500,
-    )
-    text = response.choices[0].message.content
     try:
+        client = AsyncGroq(api_key=GROQ_API_KEY)
+        system_prompt = (
+            "Here are the top performing past campaigns for similar goals: "
+            f"{json.dumps(retrieved_results, ensure_ascii=False, default=str)}. Use these as reference."
+        )
+        response = await client.chat.completions.create(
+            model=GROQ_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {
+                    "role": "user",
+                    "content": (
+                        "Create JSON only with keys ad_variants, blog_outline, social_posts. "
+                        "ad_variants must include 3 objects with headline/body/cta. "
+                        "blog_outline must include title and exactly 5 sections with heading and key_points list. "
+                        "social_posts must include exactly 5 posts for twitter/linkedin. "
+                        f"Goal: {goal}. Audience: {audience}. Company: {company_name}. "
+                        f"Product: {product_description}. USP: {usp}. Tone: {tone_of_voice}."
+                    ),
+                },
+            ],
+            max_tokens=1500,
+        )
+        text = response.choices[0].message.content
         return json.loads(text or "{}")
-    except Exception:
+    except Exception as e:
+        import sys
+        print(f"[content_agent] Error generating content pack: {type(e).__name__}: {str(e)}", file=sys.stderr)
         return _fallback_content_pack(goal, audience, company_name, product_description, usp, tone_of_voice)
 
 
