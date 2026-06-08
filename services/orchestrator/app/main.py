@@ -4,6 +4,8 @@ import asyncio
 import json
 import os
 import uuid
+import asyncio as _asyncio
+from typing import cast as _cast
 from datetime import datetime, timezone
 from typing import Any, cast
 
@@ -20,6 +22,7 @@ from shared.schemas import CampaignBrief, HealthResponse, JsonRpcError, JsonRpcR
 from shared.output_store import list_output_files, read_json_output
 from shared.validator import invalid_params_error
 from .output_bundle import create_campaign_zip
+from .. import blockchain
 
 app = FastAPI(title="MarketMind Orchestrator", version="0.1.0")
 app.add_middleware(
@@ -286,6 +289,21 @@ async def execute_campaign(campaign_id: str, brief: CampaignBrief) -> None:
                 "campaign.completed",
                 {"rounds": rounds, "spent": campaign.spent, "budget": campaign.budget},
             )
+
+            # attempt to settle on-chain: run in thread because web3.py is blocking
+            try:
+                analytics = outcome.get("analytics", {})
+                roi_score = int(analytics.get("roi_score", 0))
+                # convert campaign id to uint256-like integer
+                try:
+                    chain_id_val = int(campaign.id)
+                except Exception:
+                    chain_id_val = int.from_bytes(campaign.id.encode("utf-8"), "big") % (2 ** 256 - 1)
+
+                _ = _asyncio.get_running_loop().run_in_executor(None, blockchain.settle_campaign, chain_id_val, roi_score)
+            except Exception:
+                # don't fail campaign flow if on-chain settlement fails; log event
+                await send_event(campaign.id, "campaign.settle_failed", {"reason": "onchain_settle_failed"})
     except Exception:
         async with SessionLocal() as db:
             campaign = await db.get(Campaign, campaign_id)
@@ -356,6 +374,20 @@ async def start_campaign_from_params(params: dict[str, Any]) -> tuple[bool, dict
         )
     except ValidationError as exc:
         return False, invalid_params_error(exc.errors())
+
+    # Before starting, check on-chain funding for this campaign id
+    try:
+        try:
+            chain_id_val = int(campaign_id)
+        except Exception:
+            chain_id_val = int.from_bytes(campaign_id.encode("utf-8"), "big") % (2 ** 256 - 1)
+
+        funded = _asyncio.get_running_loop().run_in_executor(None, blockchain.is_campaign_funded, chain_id_val)
+        if not await funded:
+            return False, {"code": 40201, "message": "CAMPAIGN_NOT_FUNDED_ONCHAIN"}
+    except Exception:
+        # If blockchain check fails (misconfigured), reject start to avoid unexpected charges.
+        return False, {"code": 50001, "message": "BLOCKCHAIN_CHECK_FAILED"}
 
     async with campaign_lock:
         if active_campaign_id is not None:

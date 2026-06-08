@@ -1,4 +1,6 @@
 import { useMemo, useState } from 'react'
+import FundCampaign from './FundCampaign'
+import CampaignStatus from './CampaignStatus'
 
 function InputField({ label, children }) {
   return (
@@ -28,7 +30,10 @@ function CampaignWizard({
   onTimelineDaysChange,
   onStart,
   status,
+  contractAddress,
+  campaignId,
 }) {
+  const [onChainFunded, setOnChainFunded] = useState(false)
   const [step, setStep] = useState(1)
   const stepTitle = useMemo(() => {
     if (step === 1) return 'Company Context'
@@ -138,6 +143,29 @@ function CampaignWizard({
                   onChange={(e) => onTimelineDaysChange(e.target.value)}
                 />
               </InputField>
+
+              <div className="mt-4">
+                <h3 className="text-sm text-text-secondary">On-chain Funding</h3>
+                <div className="mt-2">
+                  {/* Wallet + fund UI */}
+                  <div className="space-y-2">
+                    {/* Wallet provider wrapper */}
+                    <div>
+                      {/* Lazy load wallet UI: simple FundCampaign + Status components */}
+                      {/* These components expect a contractAddress and campaignId in production */}
+                      <div className="flex gap-4">
+                        <div>
+                          {/* eslint-disable-next-line react/jsx-pascal-case */}
+                          <FundCampaign contractAddress={contractAddress} campaignId={campaignId} onFunded={() => setOnChainFunded(true)} />
+                        </div>
+                        <div>
+                          <CampaignStatus contractAddress={contractAddress} campaignId={campaignId} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </>
           )}
         </div>
@@ -157,7 +185,11 @@ function CampaignWizard({
             Continue
           </button>
         ) : (
-          <button onClick={onStart} className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90">
+          <button
+            onClick={onStart}
+            disabled={!onChainFunded}
+            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-40"
+          >
             {status === 'starting' || status === 'running' ? 'Launching...' : 'Launch Campaign'}
           </button>
         )}

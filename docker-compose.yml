@@ -20,6 +20,12 @@ services:
       - "8001:8001"
     env_file:
       - .env
+    environment:
+      - ALCHEMY_RPC_URL=${ALCHEMY_RPC_URL}
+      - CONTRACT_ADDRESS=${CONTRACT_ADDRESS}
+      - CONTRACT_ABI=${CONTRACT_ABI}
+      - ORCHESTRATOR_PRIVATE_KEY=${ORCHESTRATOR_PRIVATE_KEY}
+      - CHAIN_ID=${CHAIN_ID}
     volumes:
       - ./:/app
     depends_on:
