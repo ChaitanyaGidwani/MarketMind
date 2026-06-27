@@ -22,7 +22,7 @@ export default function FundCampaign({ contractAddress, campaignId, onFunded }) 
     abi: CONTRACT_ABI,
     functionName: 'fundCampaign',
     args: [BigInt(campaignId || 0)],
-    overrides: { value: ethValue ? parseEther(ethValue) : undefined },
+    value: ethValue ? parseEther(ethValue) : undefined,
   })
 
   const { write, data } = useContractWrite(config)
